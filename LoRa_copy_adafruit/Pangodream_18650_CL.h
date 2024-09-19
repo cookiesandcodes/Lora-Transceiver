@@ -1,0 +1,186 @@
+#define DEF_PIN 34//A0
+#define DEF_CONV_FACTOR 1.8
+#define DEF_READS 20
+
+class Pangodream_18650_CL {    
+  public:  
+    
+    /*
+    * Constructor
+    * @param addressPin, ADC pin number where the voltage divider is connected to
+    */
+    Pangodream_18650_CL(int addressPin);
+    
+    /*
+    * Constructor
+    * @param addressPin, ADC pin number where the voltage divider is connected to
+    * @param convFactor, Convertion factor for analog read units to volts
+    */
+    Pangodream_18650_CL(int addressPin, double convFactor);
+    
+    /*
+    * Constructor
+    * @param addressPin, ADC pin number where the voltage divider is connected to
+    * @param convFactor, Convertion factor for analog read units to volts
+    * @param reads, Number of reads of analog pin to calculate an average value
+    */
+    Pangodream_18650_CL(int addressPin, double convFactor, int reads);
+    /*
+    * Constructor
+    */
+    Pangodream_18650_CL();    
+
+    /*
+     * Get the battery charge level (0-100)
+     * @return The calculated battery charge level
+     */
+    int getBatteryChargeLevel();
+    double getBatteryVolts();
+    int getAnalogPin();
+    int pinRead();
+    double getConvFactor();
+       
+  private:
+
+    int    _addressPin;               //!< ADC pin used, default is GPIO34 - ADC1_6
+    int    _reads;                    //Number of reads of ADC pin to calculate an average value
+    double _convFactor;               //!< Convertion factor to translate analog units to volts
+    double _vs[101];                 //Array with voltage - charge definitions
+    
+    void   _initVoltsArray();
+    int    _getChargeLevel(double volts);
+    int    _analogRead(int pinNumber);
+    double _analogReadToVolts(int readValue);
+    
+};
+
+
+Pangodream_18650_CL::Pangodream_18650_CL(int addressPin, double convFactor, int reads)
+{
+    _reads = reads;
+    _convFactor = convFactor;
+    _addressPin = addressPin;
+    _initVoltsArray();
+}
+
+Pangodream_18650_CL::Pangodream_18650_CL(int addressPin, double convFactor)
+{
+    _reads = DEF_READS;
+    _convFactor = convFactor;
+    _addressPin = addressPin;
+    _initVoltsArray();
+}
+
+Pangodream_18650_CL::Pangodream_18650_CL(int addressPin)
+{
+    _reads = DEF_READS;
+    _convFactor = DEF_CONV_FACTOR;
+    _addressPin = addressPin;
+    _initVoltsArray();
+}
+
+Pangodream_18650_CL::Pangodream_18650_CL()
+{
+    _reads = DEF_READS;
+    _convFactor = DEF_CONV_FACTOR;
+    _addressPin = DEF_PIN;
+    _initVoltsArray();
+}
+
+int Pangodream_18650_CL::getAnalogPin()
+{
+    return _addressPin;
+}
+double Pangodream_18650_CL::getConvFactor()
+{
+    return _convFactor;
+}
+    
+/**
+ * Loads each voltage value in its matching charge element (index)
+ */
+void Pangodream_18650_CL::_initVoltsArray(){
+    _vs[0] = 2.640; 
+    _vs[1] = 2.645; _vs[2] = 2.650; _vs[3] = 2.655; _vs[4] = 2.660; _vs[5] = 2.665;
+    _vs[6] = 2.670; _vs[7] = 2.675; _vs[8] = 2.680; _vs[9] = 2.685; _vs[10] = 2.690;
+    _vs[11] = 2.695; _vs[12] = 2.700; _vs[13] = 2.705; _vs[14] = 2.710; _vs[15] = 2.715;
+    _vs[16] = 2.720; _vs[17] = 2.725; _vs[18] = 2.730; _vs[19] = 2.735; _vs[20] = 2.740;
+    _vs[21] = 2.745; _vs[22] = 2.750; _vs[23] = 2.755; _vs[24] = 2.760; _vs[25] = 2.765;
+    _vs[26] = 2.770; _vs[27] = 2.775; _vs[28] = 2.780; _vs[29] = 2.785; _vs[30] = 2.790;
+    _vs[31] = 2.795; _vs[32] = 2.800; _vs[33] = 2.805; _vs[34] = 2.810; _vs[35] = 2.815;
+    _vs[36] = 2.820; _vs[37] = 2.825; _vs[38] = 2.830; _vs[39] = 2.835; _vs[40] = 2.840;
+    _vs[41] = 2.845; _vs[42] = 2.850; _vs[43] = 2.855; _vs[44] = 2.860; _vs[45] = 2.865;
+    _vs[46] = 2.870; _vs[47] = 2.875; _vs[48] = 2.880; _vs[49] = 2.885; _vs[50] = 2.890;
+    _vs[51] = 2.895; _vs[52] = 2.900; _vs[53] = 2.905; _vs[54] = 2.910; _vs[55] = 2.915;
+    _vs[56] = 2.920; _vs[57] = 2.925; _vs[58] = 2.930; _vs[59] = 2.935; _vs[60] = 2.940;
+    _vs[61] = 2.945; _vs[62] = 2.950; _vs[63] = 2.955; _vs[64] = 2.960; _vs[65] = 2.965;
+    _vs[66] = 2.970; _vs[67] = 2.975; _vs[68] = 2.980; _vs[69] = 2.985; _vs[70] = 2.990;
+    _vs[71] = 2.995; _vs[72] = 3.000; _vs[73] = 3.005; _vs[74] = 3.010; _vs[75] = 3.015;
+    _vs[76] = 3.020; _vs[77] = 3.025; _vs[78] = 3.030; _vs[79] = 3.035; _vs[80] = 3.040;
+    _vs[81] = 3.045; _vs[82] = 3.050; _vs[83] = 3.055; _vs[84] = 3.060; _vs[85] = 3.065;
+    _vs[86] = 3.070; _vs[87] = 3.075; _vs[88] = 3.080; _vs[89] = 3.095; _vs[90] = 3.100;
+    _vs[91] = 3.105; _vs[92] = 3.110; _vs[93] = 3.115; _vs[94] = 3.120; _vs[95] = 3.125;
+    _vs[96] = 3.130; _vs[97] = 3.135; _vs[98] = 3.140; _vs[99] = 3.145; _vs[100] = 3.150;
+}
+
+int Pangodream_18650_CL::getBatteryChargeLevel()
+{
+    int readValue = _analogRead(_addressPin);
+    double volts = _analogReadToVolts(readValue);
+    int chargeLevel = _getChargeLevel(volts);
+    return chargeLevel;
+}
+
+int Pangodream_18650_CL::pinRead(){
+    return _analogRead(_addressPin); 
+}
+
+int Pangodream_18650_CL::_analogRead(int pinNumber){
+    int totalValue = 0;
+    int averageValue = 0;
+    for(int i = 0; i < _reads; i++){
+       totalValue += analogRead(pinNumber);
+    }
+    averageValue = totalValue / _reads;
+    return averageValue; 
+}
+/**
+ * Performs a binary search to find the index corresponding to a voltage.
+ * The index of the array is the charge %
+*/
+int Pangodream_18650_CL::_getChargeLevel(double volts){
+  int idx = 50;
+  int prev = 0;
+  int half = 0;
+  if (volts >= 3.150){
+    return 100;
+  }
+  if (volts <= 2.640){
+    return 0;
+  }
+  while(true){
+    half = abs(idx - prev) / 2;
+    prev = idx;
+    if(volts >= _vs[idx]){
+      idx = idx + half;
+    }else{
+      idx = idx - half;
+    }
+    if (prev == idx){
+      break;
+    }
+  }
+  return idx;
+}
+
+double Pangodream_18650_CL::_analogReadToVolts(int readValue){
+  double volts; 
+  volts = readValue * (5.00 / 4095.00);
+  //volts = readValue * _convFactor / 1000;
+  return volts;
+}
+
+double Pangodream_18650_CL::getBatteryVolts(){
+    int readValue = analogRead(_addressPin);
+    return _analogReadToVolts(readValue);
+}
